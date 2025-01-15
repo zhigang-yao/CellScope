@@ -4,26 +4,25 @@ CellScope is an innovative framework designed for constructing high-resolution, 
 
 ## Workflow Overview (**Figure c**)
 
-1. Manifold Assumption
-    
+1. **Manifold Assumption**
     - CellScope assumes that true biological structures in single-cell data lie on a **low-dimensional manifold** that captures cellular states and subtypes.
     - However, observed gene expression is affected by two types of noise (**Figure a**):
         - **Housekeeping gene noise** (ubiquitous genes that do not distinguish cell types).
         - **Technical noise** (mRNA loss, inefficient capture, sequencing errors).
-2. Two-Step Manifold Fitting (**Figure b**)
-    
-    - Step 1: Noise Mitigation
+
+2. **Two-Step Manifold Fitting (**Figure b**)**
+    - **Step 1: Noise Mitigation**
         - Separates **signal space** (informative genes) from **noise space** (housekeeping genes).
         - Identifies **manifold seeds** and **highly reliable cliques** to filter out irrelevant variation.
-    - Step 2: Cell-Type Stratification
+    - **Step 2: Cell-Type Stratification**
         - Assigns low-density cells (transitional states, noisy profiles) to the nearest **cell-type submanifold**.
         - Enhances biological signal while reducing artifacts.
-3. Neighborhood Graph & Clustering 
-    
+
+3. **Neighborhood Graph & Clustering**
     - Constructs a **cell-to-cell similarity graph** based on gene expression.
     - Performs **agglomerative clustering** to define biologically meaningful cell types.
-4. Tree-Structured Visualization
-    
+
+4. **Tree-Structured Visualization**
     - Integrates **UMAP** for intuitive low-dimensional visualization.
     - Generates a **hierarchical tree** to depict relationships between cell types.
     - Annotates key regulatory genes driving cell fate decisions (**Figure d**).
@@ -31,6 +30,34 @@ CellScope is an innovative framework designed for constructing high-resolution, 
 <p align="center">
   <img src="/Workflow.jpg" width="800">
 </p>
+
+---
+
+## 📂 Test Data
+
+To facilitate testing and benchmarking, we provide several datasets that can be directly accessed from this repository or downloaded from external sources.
+
+### ✅ Directly Available in This Repository:
+| Dataset Name       | Tissue            | #Cells  | #Genes  | #Cell Types |
+|-------------------|------------------|---------|---------|------------|
+| **GSE36552.mat**  | Mouse Lumbar      | 90      | 20,214  | 6          |
+| **SRP041736.mat** | Human Pancreatic  | 249     | 14,805  | 11         |
+| **GSE67835.mat**  | Human Brain       | 457     | 19,950  | 7          |
+| **GSE58739.mat**  | Mouse Pancreas    | 466     | 22,088  | 9          |
+
+### 🌍 Download from External Sources:
+| Dataset Name           | Tissue                | #Cells  | #Genes  | #Cell Types | Download Link |
+|------------------------|----------------------|---------|---------|------------|---------------|
+| **SCR015820-MidBrain** | Human Brain          | 4,714   | 59,357  | 11         | [Download Here](https://datasets.cellxgene.cziscience.com/5488ff72-58ed-4f0d-913c-1b6d4d8412b1.h5ad) |
+| **SCR015820-LNC**      | Human Brain          | 6,877   | 59,357  | 10         | [Download Here](https://datasets.cellxgene.cziscience.com/160cef00-39e7-49a3-a882-da7eb0e215fa.h5ad) |
+| **PBMC**              | PBMC                  | 49,139  | 22,827  | 25         | [Download Here](https://datasets.cellxgene.cziscience.com/fbe23743-b3b5-4e2c-9bb2-95ee14d36783.h5ad) |
+| **GSE178101**         | Human Fallopian Tubes | 77,536  | 36,960  | 12         | [Download Here](https://datasets.cellxgene.cziscience.com/26f36ff7-17b6-4285-8b35-9512dcae307b.h5ad) |
+
+### 📖 Data Usage
+To use these datasets in **CellScope**, refer to **`Test Code.ipynb`**, which provides a step-by-step tutorial on:
+- **Loading `.mat` files** using `scipy.io.loadmat()`
+- **Loading `.h5ad` files** using `scanpy.read_h5ad()`
+- **Running CellScope analysis on these datasets**
 
 ## Documentation
 
