@@ -5,14 +5,13 @@ This folder contains datasets for testing **CellScope**, including directly avai
 ## Available Datasets
 
 ### Directly Available in This Repository:
-| File Name     | Tissue |
-|--------------|-------------|
-| **GSE59739.mat** | **Mouse Lumbar** |
-| **GSE83139.mat** | **Human Pancreatic** |
-| **PHS000424V9P2_Brain.mat** | **Human Brain** |
-| **GSE132042_Pancreas.mat** | **Mouse Pancreas* |
-| **GSE67835.mat** | ** Human Brain** |
-| **GSE103322.mat** | **Human oral cavity** |
+| File Name     | Tissue |  #Cells  | |#Genes| |#Cell Types|
+|--------------|-------------|--------------|-------------|-------------|
+| **GSE36552.mat** | **Mouse Lumbar** | **90**| |**20214**| |**6**| 
+| **SRP041736.mat** | **Human Pancreatic** | **249**| |**14805**| |**11**| 
+| **GSE67835.mat** | **Human Brain** |**457**| |**19950**| |**7**|  466 22088 9
+| **GSE58739.mat** | **Mouse Pancreas* |**466**| |**22088**| |**9**| 
+
 
 ### Download from External Sources:
 For larger datasets, please download them from the following links:
