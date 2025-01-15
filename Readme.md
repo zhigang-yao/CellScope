@@ -54,6 +54,12 @@ CellScope is an innovative framework designed for constructing high-resolution, 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
 
+## Citation
+
+If you use CellScope in your research, please cite:
+
+@article{yao2025cellscope, title={CellScope: High-Performance Cell Atlas Workflow with Tree-Structured Representation}, author={Bingjie Li, Runyu Lin, Tianhao Ni, Guanao Yan, Mannix Burns, Jingyi Jessica Li and Zhigang Yao}, journal={}, year={2025} }
+
 ## Contact
 
 Contact Email: zhigang.yao@nus.edu.sg, bjlistat@nus.edu.sg, and thni@zju.edu.cn  
