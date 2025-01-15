@@ -30,7 +30,7 @@ For detailed tutorials, installation instructions, and usage examples, please vi
     - Annotates key regulatory genes driving cell fate decisions (**Figure d**).
 
 <p align="center">
-  <img src="/Workflow.jpg" width="800">
+  <img src="/Workflow.png" width="800">
 </p>
 
 ---
