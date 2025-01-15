@@ -1,0 +1,11 @@
+numpy<2.2,>=1.24
+pandas
+matplotlib
+seaborn
+scikit-learn
+scipy
+umap-learn
+joblib
+requests
+anndata
+plotly
