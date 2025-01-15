@@ -4,7 +4,7 @@
 CellScope is an innovative framework designed for constructing high-resolution, multi-scale cell atlases. It provides detailed information about gene expression, molecular characteristics, and functional states of individual cells, enabling researchers to understand cellular heterogeneity, development, and function in unprecedented detail. Traditional methods for developing comprehensive cell atlases often face challenges, such as reliance on conventional unsupervised learning algorithms and difficulties in identifying rare cell populations. CellScope addresses these limitations by employing a refined gene selection strategy, utilizing manifold fitting for cell clustering, and introducing a tree-structured visualization to represent cellular hierarchy intuitively.
 
 <p align="center">
-  <img src="/Workflow.jpg" width="1000">
+  <img src="/Workflow.jpg" width="800">
 </p>
 
 ## Features
