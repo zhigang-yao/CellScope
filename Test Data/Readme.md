@@ -15,12 +15,12 @@ This folder contains datasets for testing **CellScope**, including directly avai
 ### Download from External Sources:
 For larger datasets, please download them from the following links:
 
-| Dataset Name | File Format | Download Link |
+| Dataset Name | Download Link | Tissue            | #Cells | #Genes  | #Cell Types |
 |-------------|------------|---------------|
-| **Human Cell Atlas** | `.h5ad` | [Download Here](https://example.com/human_cell_atlas) |
-| **Mouse Brain Atlas** | `.mat` | [Download Here](https://example.com/mouse_brain_atlas) |
-| **COVID-19 Single-Cell Atlas** | `.h5ad` | [Download Here](https://example.com/covid19_atlas) |
-
+| **SCR015820-MidBrain** | Human Brain | 4714 |  59357 | 11 |[Download Here](https://datasets.cellxgene.cziscience.com/5488ff72-58ed-4f0d-913c-1b6d4d8412b1.h5ad) |
+| **SCR015820-LNC** | Human Brain | 6877 |  59357 | 10 |[Download Here]([https://datasets.cellxgene.cziscience.com/160cef00-39e7-49a3-a882-da7eb0e215fa.h5ad)) |
+| **-** | PBMC | 49139 |  22827 | 25 |[Download Here]([https://datasets.cellxgene.cziscience.com/fbe23743-b3b5-4e2c-9bb2-95ee14d36783.h5ad)) |
+| **GSE178101** | Human Fallopian Tubes | 77536 |  36960 | 12 |[Download Here]([https://datasets.cellxgene.cziscience.com/26f36ff7-17b6-4285-8b35-9512dcae307b.h5ad)) |
 ## Usage Guide
 
 To use these datasets in CellScope, refer to **`Test Code.ipynb`**, which provides a step-by-step tutorial on:
