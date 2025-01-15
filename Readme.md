@@ -32,6 +32,11 @@ CellScope is an innovative framework designed for constructing high-resolution, 
   <img src="/Workflow.jpg" width="800">
 </p>
 
+## Documentation
+
+For detailed tutorials, installation instructions, and usage examples, please visit the [CellScope Documentation](https://cellscope.readthedocs.io/en/latest/).
+
+
 ## Features
 - **Refined Gene Selection**: Implements an advanced strategy for selecting relevant genes to improve the accuracy of cell clustering.
 - **Manifold Fitting for Clustering**: Utilizes manifold fitting techniques to enhance the clustering performance of cells, allowing for better identification of cell populations.
