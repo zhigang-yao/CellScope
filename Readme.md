@@ -65,6 +65,7 @@ If you use CellScope in your research, please cite:
   journal={},
   year={2025}
 }
+```
 
 ## Contact
 
