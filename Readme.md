@@ -2,6 +2,8 @@
 
 CellScope is an innovative framework designed for constructing high-resolution, multi-scale cell atlases. It provides detailed information about gene expression, molecular characteristics, and functional states of individual cells, enabling researchers to understand cellular heterogeneity, development, and function in unprecedented detail. Traditional methods for developing comprehensive cell atlases often face challenges, such as reliance on conventional unsupervised learning algorithms and difficulties in identifying rare cell populations. CellScope addresses these limitations by employing a refined gene selection strategy, utilizing manifold fitting for cell clustering, and introducing a tree-structured visualization to represent cellular hierarchy intuitively.
 
+For detailed tutorials, installation instructions, and usage examples, please visit the [CellScope Documentation](https://cellscope.readthedocs.io/en/latest/).
+
 ## Workflow Overview (**Figure c**)
 
 1. **Manifold Assumption**
@@ -58,11 +60,6 @@ To use these datasets in **CellScope**, refer to **`Test Code.ipynb`**, which pr
 - **Loading `.mat` files** using `scipy.io.loadmat()`
 - **Loading `.h5ad` files** using `scanpy.read_h5ad()`
 - **Running CellScope analysis on these datasets**
-
-## Documentation
-
-For detailed tutorials, installation instructions, and usage examples, please visit the [CellScope Documentation](https://cellscope.readthedocs.io/en/latest/).
-
 
 ## Features
 - **Refined Gene Selection**: Implements an advanced strategy for selecting relevant genes to improve the accuracy of cell clustering.
