@@ -53,7 +53,7 @@ To facilitate testing and benchmarking, we provide several datasets that can be 
 | **--**              | PBMC                  | 49,139  | 22,827  | 25         | [Download Here](https://datasets.cellxgene.cziscience.com/fbe23743-b3b5-4e2c-9bb2-95ee14d36783.h5ad) |
 | **GSE178101**         | Human Fallopian Tubes | 77,536  | 36,960  | 12         | [Download Here](https://datasets.cellxgene.cziscience.com/26f36ff7-17b6-4285-8b35-9512dcae307b.h5ad) |
 
-### 📖 Data Usage
+### Data Usage
 To use these datasets in **CellScope**, refer to **`Test Code.ipynb`**, which provides a step-by-step tutorial on:
 - **Loading `.mat` files** using `scipy.io.loadmat()`
 - **Loading `.h5ad` files** using `scanpy.read_h5ad()`
