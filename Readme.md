@@ -27,7 +27,7 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 ## Author
 Runyu Lin, Bingjie Li and Tianhao Ni  
-Contact Email: thni@zju.edu.cn  
+Contact Email: zhigang.yao@nus.edu.sg, bjlistat@nus.edu.sg, and thni@zju.edu.cn  
 
-Copyright (c) 2023 Tianhao Ni
+Copyright (c) 2025 Yao group
 
