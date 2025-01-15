@@ -55,6 +55,8 @@ For detailed tutorials, installation instructions, and usage examples, please vi
 - scipy
 - umap-learn
 - joblib
+- anndata
+- plotly
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
