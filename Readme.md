@@ -73,21 +73,6 @@ For detailed tutorials, installation instructions, and usage examples, please vi
 - **Exceptional Computational Efficiency**: Optimized for scalability to large datasets with minimal dependence on hyper-parameter tuning.
 - **Disease Analysis Pipeline**: Includes a specialized pipeline for analyzing disease-control single-cell atlases, revealing distinct cellular expression patterns in conditions such as COVID-19.
 
-## Dependencies
-- numpy
-- pandas
-- matplotlib
-- seaborn
-- scikit-learn
-- scipy
-- umap-learn
-- joblib
-- anndata
-- plotly
-
-## License
-This project is licensed under the MIT License. See the LICENSE file for details.
-
 ## Citation
 
 If you use CellScope in your research, please cite:
