@@ -33,11 +33,11 @@ CellScope is an innovative framework designed for constructing high-resolution, 
 
 ---
 
-## 📂 Test Data
+## Test Data
 
-To facilitate testing and benchmarking, we provide several datasets that can be directly accessed from this repository or downloaded from external sources.
+To facilitate testing and benchmarking, we provide several datasets that can be directly accessed from `Test Data/` or downloaded from external sources.
 
-### ✅ Directly Available in This Repository:
+### Directly Available in `Test Data/` Folder:
 | Dataset Name       | Tissue            | #Cells  | #Genes  | #Cell Types |
 |-------------------|------------------|---------|---------|------------|
 | **GSE36552.mat**  | Mouse Lumbar      | 90      | 20,214  | 6          |
@@ -45,7 +45,7 @@ To facilitate testing and benchmarking, we provide several datasets that can be 
 | **GSE67835.mat**  | Human Brain       | 457     | 19,950  | 7          |
 | **GSE58739.mat**  | Mouse Pancreas    | 466     | 22,088  | 9          |
 
-### 🌍 Download from External Sources:
+### Download from External Sources:
 | Dataset Name           | Tissue                | #Cells  | #Genes  | #Cell Types | Download Link |
 |------------------------|----------------------|---------|---------|------------|---------------|
 | **SCR015820-MidBrain** | Human Brain          | 4,714   | 59,357  | 11         | [Download Here](https://datasets.cellxgene.cziscience.com/5488ff72-58ed-4f0d-913c-1b6d4d8412b1.h5ad) |
