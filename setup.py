@@ -24,6 +24,7 @@ setup(
         'joblib',
         'requests',
         'anndata',
-        'plotly'
+        'plotly',
+        'kaleido'
     ],
 )
