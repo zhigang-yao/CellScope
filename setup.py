@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='CellScope',
-    version='0.1.0',
+    name='CellScope-RNA',
+    version='0.1.3',
     author='Tianhao Ni',
     author_email='thni@zju.edu.cn',
     description='A package for analyzing and visualizing gene expression data',
@@ -25,6 +25,7 @@ setup(
         'requests',
         'anndata',
         'plotly',
-        'kaleido'
+        'kaleido',
+        'nbformat>=4.2.0'
     ],
 )
