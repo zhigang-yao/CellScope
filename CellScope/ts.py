@@ -129,7 +129,7 @@ def visualize_tree_structured(Y_initial, label_step0, Y_1, Title_1, Y_all, Title
     """
     if save_fig and not isinstance(save_path, str):
         raise ValueError("'save_path' must be a valid string when 'save_fig' is True.")
-    np.random.seed(0)
+    np.random.seed(83)
     celltype = T[:, step1].astype(int)
     unique_celltypes = np.unique(celltype)
     colors = np.random.rand(len(unique_celltypes), 3)
