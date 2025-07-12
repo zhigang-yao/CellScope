@@ -1,22 +1,158 @@
 import numpy as np
-from scipy.cluster.hierarchy import linkage, fcluster
-import umap.umap_ as umap
-from sklearn.decomposition import PCA, TruncatedSVD
-from scipy.stats import f_oneway
+import scipy.stats as stats
+from scipy.sparse import csr_matrix, issparse, isspmatrix_csr, coo_matrix
 from scipy.sparse.csgraph import connected_components
-from joblib import Parallel, delayed
-from sklearn.neighbors import NearestNeighbors
-from scipy.sparse import issparse,csr_matrix,isspmatrix_csr
-import random
 from scipy.spatial.distance import squareform
+from scipy.cluster.hierarchy import fcluster
+from scipy.stats import f_oneway
+from sklearn.decomposition import PCA
+from sklearn.neighbors import NearestNeighbors
+from sklearn.utils.extmath import randomized_svd
+from numba import njit
+import fastcluster
+import random
+from scipy.sparse import diags
+import gc
+from scipy.stats import mode
+from joblib import Parallel, delayed
 from sklearn.manifold import TSNE
 from umap.umap_ import UMAP
-import warnings
-from scipy.stats import ConstantInputWarning
-warnings.filterwarnings("ignore", category=ConstantInputWarning)
 
-np.random.seed(83)
+seed = 83
+random.seed(seed)
+np.random.seed(seed)
 
+def deterministic_svd(X, n_components, random_state):
+    X = X.astype(np.float64)
+    U, S, Vt = randomized_svd(
+        X,
+        n_components=n_components,
+        n_iter=5,
+        random_state=random_state
+    )
+    sign_flip = np.sign(Vt[:, 0]).astype(np.int8)
+    np.multiply(U, sign_flip[np.newaxis, :], out=U)
+    np.multiply(Vt, sign_flip[:, np.newaxis], out=Vt)
+    
+    return U, S
+
+def compute_umap_similarity_graph(knn_index, knn_dist):
+    n_samples = knn_index.shape[0]
+    n_neighbors = knn_index.shape[1]
+    sigmas, rhos = smooth_knn_dist(knn_dist, n_neighbors)
+    rows, cols, vals = compute_membership_strengths(
+        knn_index, knn_dist, sigmas, rhos, n_neighbors
+    )
+    W = coo_matrix((vals, (rows, cols)), shape=(n_samples, n_samples))
+    W.eliminate_zeros()
+    transpose = W.transpose()
+    prod_matrix = W.multiply(transpose)
+    W = W + transpose - prod_matrix
+    W.eliminate_zeros()
+    return W
+
+@njit
+def smooth_knn_dist(distances, k, local_connectivity=1.0):
+    n_samples = distances.shape[0]
+    rhos = np.zeros(n_samples)
+    sigmas = np.zeros(n_samples)
+    
+    for i in range(n_samples):
+        rhos[i] = distances[i, 0] if k > 0 else 0.0
+        lo = 0.0
+        hi = np.inf
+        mid = 1.0
+        for _ in range(50): 
+            psum = 0.0
+            for j in range(1, k):
+                d = distances[i, j] - rhos[i]
+                if d > 0:
+                    psum += np.exp(-(d / mid))
+                else:
+                    psum += 1.0
+            if np.abs(psum - local_connectivity) < 1e-5:
+                break
+                
+            if psum > local_connectivity:
+                hi = mid
+                mid = (lo + hi) / 2
+            else:
+                lo = mid
+                if hi == np.inf:
+                    mid *= 2
+                else:
+                    mid = (lo + hi) / 2
+                    
+        sigmas[i] = mid
+    
+    return sigmas, rhos
+
+@njit
+def compute_membership_strengths(knn_index, knn_dist, sigmas, rhos, k):
+    n_samples = knn_index.shape[0]
+    rows = np.zeros(n_samples * k, dtype=np.int32)
+    cols = np.zeros(n_samples * k, dtype=np.int32)
+    vals = np.zeros(n_samples * k, dtype=np.float32)
+    
+    position = 0
+    for i in range(n_samples):
+        for j in range(k):
+            if knn_index[i, j] == -1:  # 无效邻居
+                continue
+            dist = max(0.0, knn_dist[i, j] - rhos[i])
+            val = np.exp(-dist / sigmas[i])
+            rows[position] = i
+            cols[position] = knn_index[i, j]
+            vals[position] = val
+            position += 1
+    return rows[:position], cols[:position], vals[:position]
+
+
+def large_scale_knn(X, k=5,metric='euclidean'):
+    nn = NearestNeighbors(n_neighbors=k, algorithm='auto', 
+                         metric=metric, n_jobs=-1)
+    nn.fit(X)
+    return nn.kneighbors(X)
+
+def knn_search(data,k=5,metric = 'euclidean'):
+    knn_dist,knn_index = large_scale_knn(data, k,metric = metric)
+    return knn_index,knn_dist
+def jaccard_distance(A, B):
+    intersection = np.logical_and(A, B).sum()
+    union = np.logical_or(A, B).sum()
+    if union == 0: 
+        return 1.0
+    return 1 - (intersection / union)
+
+def construct_graph(fea,metric = 'euclidean',jaccard = False):
+    if jaccard:
+        fea[fea>0] = 1
+        fea = fea.astype(bool)
+        knn = 10*int(np.log(fea.shape[0]))
+        knn_index,knn_dist = knn_search(fea,k=knn,metric=metric)
+        num_cell = knn_index.shape[0]
+        knn_dist = np.zeros((num_cell, knn))
+        
+        for i in range(num_cell):
+            vec_i = fea[i,:]
+            for k in range(knn):
+                j = knn_index[i, k]
+                vec_j = fea[j]
+                knn_dist[i, k] =jaccard_distance(vec_i, vec_j)
+        W = compute_umap_similarity_graph(knn_index, knn_dist)
+    else:
+        knn = int(np.log(fea.shape[0]))
+        knn_index,knn_dist = knn_search(fea,k=knn,metric=metric)
+        num_cell = knn_index.shape[0]
+        W = compute_umap_similarity_graph(knn_index, knn_dist)
+        # neighbors = umap.fuzzy_simplicial_set(
+        #     fea,
+        #     n_neighbors=knn, 
+        #     random_state=83,
+        #     metric=metric
+        # )
+        # W = neighbors[0]
+    return W
 
 def Normalization(fea_raw: np.ndarray or csr_matrix) -> (np.ndarray or csr_matrix, np.ndarray or csr_matrix, np.ndarray or csr_matrix):
     """
@@ -167,23 +303,22 @@ def Manifold_Fitting_1(fea: np.ndarray or csr_matrix, num_pca: int = 100, num_Se
     num_cell,num_gene = fea.shape
     num_pca = min(num_pca,num_cell-1)
     if issparse(fea):
-        pca = PCA(n_components=num_pca)
-        svd = TruncatedSVD(n_components=num_pca,random_state=random_seed)
-        fea_pca = svd.fit_transform(fea)
+        U, S = deterministic_svd(fea, num_pca, random_seed)
+        fea_pca = U * S
     else:
         pca = PCA(n_components=num_pca,random_state=random_seed)
         fea_pca = pca.fit_transform(fea)
-    nbrs = NearestNeighbors(n_neighbors=min(num_cell, 1000), algorithm='auto').fit(fea_pca)
 
-    # Find k nearest neighbors
-    distances, indices = nbrs.kneighbors(fea_pca)
-    D_NB = distances[:, :knn]
-    ID_NB = indices[:, :knn]
+    nbrs = NearestNeighbors(n_neighbors=knn, algorithm='auto',n_jobs = -1).fit(fea_pca)
+    D_NB,ID_NB = nbrs.kneighbors(fea_pca)
+    
     # Select the top k nearest neighbor distances and indices
     rho = 1. / np.sum(D_NB, axis=1)
     delta = np.zeros(num_cell)
+    higher_density_mask = rho.reshape(-1, 1) < rho.reshape(1, -1)
+    
     for ii in range(num_cell):
-        temp = np.where(rho > rho[ii])[0]
+        temp = np.where(higher_density_mask[ii])[0]
         inter_temp = np.intersect1d(temp, ID_NB[ii,:])
         if len(inter_temp) == 0:
             delta[ii] = np.max(D_NB[ii,:])
@@ -218,6 +353,8 @@ def Manifold_Fitting_1(fea: np.ndarray or csr_matrix, num_pca: int = 100, num_Se
         Clusters = Clusters[clusters > 0]
         Q = np.dot(Clusters, Clusters.T)
         _, label = connected_components(Q, directed=False)
+    temp = np.where(clusters>0)[0]
+    unique_labels = np.unique(label)
     p_values = np.zeros(num_gene)
     temp = np.where(clusters>0)[0]
     p_values = Parallel(n_jobs=-1)(delayed(calculate_p_value)(i, fea, temp, label) for i in range(num_gene))
@@ -281,6 +418,26 @@ def Manifold_Fitting_2( fea_selected: np.ndarray, num_neighbor: int = 5, fitting
     fea_selected = fea_new
     return fea_selected,fitting_index,index
 
+def graph_importance_sampling(W, num_samples):
+    centrality = np.sum(W, axis=1)       # 使用度中心性
+    p = centrality / np.sum(centrality)
+    return np.random.choice(range(len(W)), num_samples, p=p, replace=False)
+
+
+def Trans_W_D(W_sparse):
+    n = W_sparse.shape[0]
+    D_vector = np.ones(n * (n - 1) // 2, dtype=np.float32)  # 全部初始化为1（即 D[i,j]=1）
+
+    W_sparse = W_sparse - diags(W_sparse.diagonal())
+    W_sparse = W_sparse.tocoo()
+
+    for i, j, val in zip(W_sparse.row, W_sparse.col, W_sparse.data):
+        if i > j:
+            idx = j * n - (j * (j + 1)) // 2 + (i - j - 1)
+        else:
+            continue  # 跳过对角线
+        D_vector[idx] = 1 - val  # 更新真实值
+    return D_vector
 
 def GraphCluster(fea_selected: np.ndarray, metric: str = None, 
                     num_cell_thre: int = 100000, index: list = [],random_seed = 83) -> np.ndarray:
@@ -312,66 +469,48 @@ def GraphCluster(fea_selected: np.ndarray, metric: str = None,
     # Check if random_seed is an integer
     if not isinstance(random_seed, int):
         raise ValueError("'random_seed' must be an integer.")
-    knn = np.ceil(np.log2(fea_selected.shape[0]))
-
-    if metric==None:
-        if fea_selected.shape[0]<10000:
-            metric = 'euclidean'
-        else:
-            metric = 'jaccard'
+    if fea_selected.shape[0]<10000:
+        jaccard = False
     else:
-        metric = metric
-    neighbors = umap.fuzzy_simplicial_set(
-    fea_selected,
-    n_neighbors=knn, 
-    random_state=random_seed,
-    metric=metric
-)
-    W = neighbors[0]
+        jaccard = True
     num_cell = fea_selected.shape[0]
     if num_cell>num_cell_thre:
         if index==[]:
+            random.seed(random_seed) 
             index = random.sample(range(num_cell), num_cell_thre)
+        
         index_unselected = set(range(num_cell))-set(index)
         index_unselected = list(index_unselected)
-        knn_index = np.ceil(np.log2(len(index)))
+        num_remaining_samples = len(index_unselected)
         fea_selected_index = fea_selected[index,:]
-        neighbors_index = umap.fuzzy_simplicial_set(
-        fea_selected_index,
-        n_neighbors=knn_index, 
-        random_state=random_seed,
-        metric=metric
-    )   
-        W1 = neighbors_index[0].toarray()
-        D1 = 1-W1
-        D1 = D1-np.diag(np.diag(D1))
-        D1 = squareform(D1)
-        Z = linkage(D1, method='average')
+        fea_selected_unindex = fea_selected[index_unselected,:]
+        if 'fea_selected' in locals() and jaccard:
+            del fea_selected
+            gc.collect()
+        nn = NearestNeighbors(n_neighbors=5, metric=metric)
+        nn.fit(fea_selected_index)
+        knn_dist, knn_index = nn.kneighbors(fea_selected_unindex)
+        W1 = construct_graph(fea_selected_index ,jaccard = jaccard)
+        
+        W1 = Trans_W_D(W1)
+        Z = fastcluster.linkage(W1, method='average')
+        del W1; gc.collect()
         T_all = np.zeros((num_cell,49))
-
+        
         for ii in range(2,51):
             T = 100*np.ones((num_cell))
             T1 = fcluster(Z, ii, criterion='maxclust')
             T1 = T1-1
             T[index] = T1
-            num_classes = len(np.unique(T1))
-            num_remaining_samples = len(index_unselected)
-            class_avg_similarities = np.zeros((num_remaining_samples, num_classes))
-            for class_label in range(num_classes):
-                class_indices = np.where(T1 == class_label)[0]
-                class_indices = [index[i] for i in class_indices]
-                class_similarity_matrix = W[np.ix_(index_unselected, class_indices)]
-                class_avg_similarity = np.mean(class_similarity_matrix, axis=1)
-                class_avg_similarities[:, class_label] = class_avg_similarity.reshape(-1)
-            remaining_samples_labels = np.argmax(class_avg_similarities, axis=1)
-            T[index_unselected] = remaining_samples_labels
-            T_all[:,ii-2] = T
+            knn_classes = T1[knn_index]  # 获取每个近邻的类别 (n_samples_unselected, k)
+            remaining_samples_labels, _ = mode(knn_classes, axis=1)
+            remaining_samples_labels = remaining_samples_labels.ravel()  # 展平为一维数组
+            T[index_unselected] = remaining_samples_labels  # 未选取样本使用KNN多数投票结果
+            T_all[:, ii-2] = T
     else:
-        W = W.toarray()
-        D = 1-W
-        D = D-np.diag(np.diag(D))
-        D = squareform(D)
-        Z = linkage(D, method='average')
+        W = construct_graph(fea_selected,jaccard = jaccard)
+        W = Trans_W_D(W)
+        Z = fastcluster.linkage(W, method='average')
         T_all = np.zeros((num_cell,49))
     
         for ii in range(2,51):
@@ -380,6 +519,7 @@ def GraphCluster(fea_selected: np.ndarray, metric: str = None,
     T_all -= np.min(T_all, axis=0)
     T_all = T_all.astype(int)
     return T_all
+
 
 def Visualization( fea: np.ndarray, Visualization_Method: str = "UMAP", random_seed: int = 83) -> np.ndarray:
     """
@@ -393,7 +533,7 @@ def Visualization( fea: np.ndarray, Visualization_Method: str = "UMAP", random_s
         fea = fea.toarray()
     if Visualization_Method.lower() == "pca":
         pca = PCA(n_components=2)
-        Y = pca.fit_transform(fea)
+        Y = pca.fit_transorm(fea)
     elif Visualization_Method.lower() == "tsne":
         tsne = TSNE(n_components=2, random_state=random_seed)
         Y = tsne.fit_transform(fea)

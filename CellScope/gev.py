@@ -5,7 +5,6 @@ import seaborn as sns
 import matplotlib.gridspec as gridspec
 from scipy.sparse import issparse
 import os
-from scipy.sparse import issparse
 
 def scatter_gene_expression(fea, Y: np.ndarray, marker_gene_indices: list, marker_gene_name: list, 
                             figsize=(15, 9), subplot_size=None, save_fig=False, save_path=None):
